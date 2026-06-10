@@ -4,47 +4,36 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import pickle
 
+# Use cleaned dataset
+data = pd.read_csv("Cardiovascular_Disease_Dataset_Cleaned.csv")
 
-data = pd.read_csv("heart.csv")
-
-# Features and Target
 X = data.drop(columns=['patientid', 'target'])
 y = data['target']
+
+# Fix 2: stratify=y
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
+    X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# Train Model
+# Fix 1: class_weight='balanced'
 model = RandomForestClassifier(
     n_estimators=100,
+    class_weight='balanced',
     random_state=42
 )
-
 model.fit(X_train, y_train)
 
-# Predictions
 y_pred = model.predict(X_test)
-
-# Accuracy
 accuracy = accuracy_score(y_test, y_pred)
 
-print("\n" + "="*50)
+print("=" * 50)
 print("MODEL PERFORMANCE")
-print("="*50)
-
+print("=" * 50)
 print(f"Accuracy: {accuracy*100:.2f}%")
-
-# Confusion Matrix
-cm = confusion_matrix(y_test, y_pred)
-
 print("\nConfusion Matrix:")
-print(cm)
-
-# Classification Report
+print(confusion_matrix(y_test, y_pred))
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred))
 
-# Save Model
 pickle.dump(model, open("heart_model.pkl", "wb"))
-
 print("\nModel trained successfully!")
